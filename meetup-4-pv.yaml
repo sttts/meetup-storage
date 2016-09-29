@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: meetup-4
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  glusterfs:
+    endpoints: gluster
+    path: meetup-4
+    readOnly: false
+  persistentVolumeReclaimPolicy: Retain

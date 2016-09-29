@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: meetup-4
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+              name: "http-server"
+          volumeMounts:
+          - mountPath: "/usr/share/nginx/html"
+            name: html
+            readOnly: true
+      volumes:
+        - name: html
+          persistentVolumeClaim:
+           claimName: meetup-4

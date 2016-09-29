@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gluster
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: daemon
+  namespace: gluster
+spec:
+  ports:
+    - port: 24007
+      protocol: TCP
+  selector:
+    name: gluster
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: gluster
+  namespace: gluster
+spec:
+  selector:
+    matchLabels:
+      name: gluster
+  template:
+    metadata:
+      labels:
+        name: gluster
+    spec:
+      containers:
+        - image: gluster/gluster-centos
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - systemctl status glusterd.service
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: gluster
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - systemctl status glusterd.service
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /mnt/brick1
+              name: gluster-brick
+            - mountPath: /etc/glusterfs
+              name: gluster-etc
+            - mountPath: /var/log/glusterfs
+              name: gluster-logs
+            - mountPath: /var/lib/glusterd
+              name: gluster-config
+            - mountPath: /dev
+              name: gluster-dev
+            - mountPath: /sys/fs/cgroup
+              name: gluster-cgroup
+      hostNetwork: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 1
+      volumes:
+        - hostPath:
+            path: /mnt/brick1
+          name: gluster-brick
+        - hostPath:
+            path: /etc/glusterfs
+          name: gluster-etc
+        - hostPath:
+            path: /var/log/glusterfs
+          name: gluster-logs
+        - hostPath:
+            path: /var/lib/glusterd
+          name: gluster-config
+        - hostPath:
+            path: /dev
+          name: gluster-dev
+        - hostPath:
+            path: /sys/fs/cgroup
+          name: gluster-cgroup
+
